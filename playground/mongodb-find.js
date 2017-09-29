@@ -5,7 +5,6 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) =>{
         return console.log('Unable to connect to MongoDB server');
     }
     console.log('Connected to the MongoDb server');
-
     db.collection('Todos').find({completed: false}).toArray().then((docs) => {//returns a cursor to mongodb. When calling toArray we convert it to an array of objects
             //INSIDE FIND WE CAN INCLUDE OUR QUERY VALUES IN AN OBJECT FORM
             //calling toAray, returns a promise
@@ -15,7 +14,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) =>{
 
         //////////////////////////////////////QUERRY BY A GIVEN OBJECT ID////////////////////////////////////////
         //the object id is not a string, it is of type object
-        //db.collection('Todos').find({_id: nw ObjectID('59cba1831fa58d21d86ce475')}).toArray().then((docs)
+        //db.collection('Todos').find({_id: new ObjectID('59cba1831fa58d21d86ce475')}).toArray().then((docs)
     }, (err) =>{
         console.log('Unable to fetch todos');
     });

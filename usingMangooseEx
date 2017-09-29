@@ -1,0 +1,61 @@
+//mongoose ofers a much easier usage of data validation. We could've done that without using mangoose, but be doing so we get some fantastic features
+var mongoose = require('mongoose');
+
+//need to connect to the db. Mongoose suports callbacks
+mongoose.Promise = global.Promise;//tells mangoose to use the buit-in promise library as supossed to a third-party buit in promise
+mongoose.connect('mongodb://localhost:27017/TodoApp');//mentains the connection over time
+//mangoose manages type casting: number-> string
+//we create a model for everything we want to store 
+var Todo = mongoose.model('Todo', {//comes back from the model, and we use it below
+    text: {
+        type: String,
+        required: true,//will generate an error message if you don't specify the String
+        minlength: 1,
+        trim: true
+    },
+    completed: {
+        type: Boolean,
+        default: false
+    },
+    completedAt:{
+        type: Number,
+        default:null
+    }
+});
+var newTodo = new Todo({
+    text: 'Cook dinner'
+});
+var anotherTodo = new Todo({
+    text: 'Cook more',
+    completed: true,
+    completedAt: 21
+});
+//we need to call a method on newTodo to save it into the mangoDb 
+newTodo.save().then((doc) =>{
+    console.log('Saved todo', doc);
+}, (e) =>{
+    console.log('Unable to save todo');
+});
+anotherTodo.save().then((doc) => {
+    console.log(doc);
+}, (e) => {
+    console.log('Unable to save todo ');
+})
+var User = mongoose.model('User', {
+    email: {
+        required:true,
+        trim:true,
+        type:String,
+        minlength:1
+    }
+});
+var newUser = new User({
+    email:'sugar@candy.com'
+});
+newUser.save().then((doc) =>{
+    console.log(doc);
+}, (e) => {
+    console.log('Unable to save user', e);
+});
+
+var {mongoose} = require('./db/mongoose')
