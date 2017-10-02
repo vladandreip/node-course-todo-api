@@ -24,3 +24,7 @@ app.post('/todos', (req,res) =>{//for creating a todo model
         res.status(400).send(e);
     });
 });
+
+module.exports = {
+    app
+};
