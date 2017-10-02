@@ -7,9 +7,16 @@ const {Todo} = require('./../models/todo');
 beforeEach((done) => { //executes before test cases 
     Todo.remove({})//wipes all the database
     .then(() => {
-        done();
-    });
-})
+        //done();
+        return Todo.insertMany(todos);
+    }).then(() => done());
+});
+
+const todos = [{//2 dummy data
+    text: 'First test todo'
+}, {
+    text: 'Second test todo'
+}];
 
 describe('Post /todos', ()=>{
     it('should create a new todo', (done) =>{
@@ -28,7 +35,7 @@ describe('Post /todos', ()=>{
                 return done(err);
             }
 
-            Todo.find().then((todos) => {//similar to mongoDb 
+            Todo.find({text}).then((todos) => {//similar to mongoDb 
                 expect(todos.length).toBe(1);
                 expect(todos[0].text).toBe(text);
                 done();
@@ -47,7 +54,7 @@ describe('Post /todos', ()=>{
                 return done(err);
             }
             Todo.find().then((todos) => {//similar to mongoDb 
-                expect(todos.length).toBe(0);
+                expect(todos.length).toBe(2);//2 from the dummy data added above 
                 done();
             }).catch((e) =>{
                 return done(e);
@@ -55,3 +62,16 @@ describe('Post /todos', ()=>{
         });
     });
 });
+
+describe('GET /todos', ()=>{
+    it('should get all todos', (done) => {
+        request(app)
+        .get('/todos')
+        .expect(200)//expect that a 200 comes back
+        .expect((res) => {
+            expect(res.body.todos.length).toBe(2);
+        })
+        .end(done);// THERE IS NO NEED TO PROVIDE A FUNCTION TO END LIKE WE ARE DOING UP ABOVE
+                   // BECAUSE WE ARE NOT DOING ANYTHING ASYNCHRONOUSLY
+    })
+})
