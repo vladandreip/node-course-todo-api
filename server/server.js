@@ -24,7 +24,16 @@ app.post('/todos', (req,res) =>{//for creating a todo model
         res.status(400).send(e);
     });
 });
-
+app.get('/todos', (req,res) =>{
+    Todo.find().then((todos) => {
+        res.send({//we create an object with first propriety being the todos array. By doing this we are able to send more codes, specifing them in the object
+            todos,//todos:todos
+            cod: 'Un cod'
+        })
+    }, (e) => {
+        res.status(400).send(e);
+    });
+})
 module.exports = {
     app
 };
