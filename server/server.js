@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+var {ObjectId} = require('mongodb');
 
 ////////Configuration for basic server///////////
 var app = express();//stores express application
@@ -24,6 +25,23 @@ app.post('/todos', (req,res) =>{//for creating a todo model
         res.status(400).send(e);
     });
 });
+// Get /todos/123123. Fetching an Url parameter follows this pattern, where the todosId is 123123 -> it could be called anyway.
+app.get('/todos/:id', (req, res) => {
+    //to acces the id you need to use req.params.id
+    var id = req.params.id;
+    if(!ObjectId.isValid(id)){
+        res.status(404).send();
+    }
+    Todo.findById(id).then((todo) =>{
+        if(!todo){
+            return res.status(404).send();
+        }
+        res.status(200).send({todo});
+    }).catch((e) => {
+        res.status(400).send();
+    });
+   
+});
 app.post('/users', (req,res) =>{
     var user = new User({
         email: req.body.email
@@ -33,7 +51,7 @@ app.post('/users', (req,res) =>{
     }, (e) =>{
         console.log('Could not save user.', e);
     })
-})
+});
 app.get('/todos', (req,res) =>{
     Todo.find().then((todos) => {
         res.send({//we create an object with first propriety being the todos array. By doing this we are able to send more codes, specifing them in the object
