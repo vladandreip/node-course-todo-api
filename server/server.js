@@ -27,8 +27,7 @@ app.post('/todos', (req,res) =>{//for creating a todo model
 });
 // Get /todos/123123. Fetching an Url parameter follows this pattern, where the todosId is 123123 -> it could be called anyway.
 app.get('/todos/:id', (req, res) => {
-    //to acces the id you need to use req.params.id
-    var id = req.params.id;
+    var id = req.params.id; //to acces the id you need to use req.params.id
     if(!ObjectId.isValid(id)){
         res.status(404).send();
     }

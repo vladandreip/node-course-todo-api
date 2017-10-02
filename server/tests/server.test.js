@@ -3,20 +3,25 @@ const request = require('supertest');
 
 const {app} = require('./../server')// the .. goes back from the tests directory into the server directory from where we can acces server.js without passing the extension
 const {Todo} = require('./../models/todo');
+const {ObjectId} = require('mongodb');
 
+
+
+const todos = [{//2 dummy data
+    _id: new ObjectId(),
+    text: 'First test todo'
+}, {
+    _id: new ObjectId(),
+    text: 'Second test todo'
+}];
 beforeEach((done) => { //executes before test cases 
     Todo.remove({})//wipes all the database
     .then(() => {
         //done();
         return Todo.insertMany(todos);
+        //done();
     }).then(() => done());
 });
-
-const todos = [{//2 dummy data
-    text: 'First test todo'
-}, {
-    text: 'Second test todo'
-}];
 
 describe('Post /todos', ()=>{
     it('should create a new todo', (done) =>{
@@ -73,5 +78,30 @@ describe('GET /todos', ()=>{
         })
         .end(done);// THERE IS NO NEED TO PROVIDE A FUNCTION TO END LIKE WE ARE DOING UP ABOVE
                    // BECAUSE WE ARE NOT DOING ANYTHING ASYNCHRONOUSLY
-    })
-})
+    });
+});
+describe('GET /todos/:id', () => {
+    it('should return todo doc', (done) => {
+        request(app)
+        .get(`/todos/${todos[0]._id.toHexString()}`)
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(todos[0].text)
+        }).end(done);
+    });
+});
+
+it('should return a 404 if todo not found', (done) => {
+    var _id = new ObjectId();
+    request(app)
+    .get(`/todos/:${_id.toHexString}`)
+    .expect(404)
+    .end(done);
+});
+
+it('should return a 404 for non-object ids', (done) => {
+    request(app)
+    .get('/todos/:123')
+    .expect(404)
+    .end(done);
+});
