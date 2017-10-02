@@ -24,6 +24,16 @@ app.post('/todos', (req,res) =>{//for creating a todo model
         res.status(400).send(e);
     });
 });
+app.post('/users', (req,res) =>{
+    var user = new User({
+        email: req.body.email
+    });
+    user.save().then((doc) => {
+        console.log(doc);
+    }, (e) =>{
+        console.log('Could not save user.', e);
+    })
+})
 app.get('/todos', (req,res) =>{
     Todo.find().then((todos) => {
         res.send({//we create an object with first propriety being the todos array. By doing this we are able to send more codes, specifing them in the object

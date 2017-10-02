@@ -53,7 +53,7 @@ describe('Post /todos', ()=>{
             if(err){
                 return done(err);
             }
-            Todo.find().then((todos) => {//similar to mongoDb 
+            Todo.find().then((todos) => {//Querrying data with Mangoose, similar to mongoDb 
                 expect(todos.length).toBe(2);//2 from the dummy data added above 
                 done();
             }).catch((e) =>{
