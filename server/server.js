@@ -8,8 +8,9 @@ var {ObjectId} = require('mongodb');
 
 ////////Configuration for basic server///////////
 var app = express();//stores express application
-app.listen(3000, ()=>{
-    console.log('Started on port 3000');
+const port = process.env.PORT || 3000;
+app.listen(port, ()=>{
+    console.log(`Started on port ${port}`);
 });
 /////////////////////////////////////////////////
 app.use(bodyParser.json());//the return value is a function and that is the middleware we need to give to express. Now, we can send json to our application
