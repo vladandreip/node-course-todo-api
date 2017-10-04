@@ -62,6 +62,22 @@ app.get('/todos', (req,res) =>{
         res.status(400).send(e);
     });
 })
+app.delete('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    if(!ObjectId.isValid(id)){
+        return res.status(404).send();
+    }
+    Todo.findByIdAndRemove(id).then((doc) => {
+        if(!doc){//if we do not have any record, the deletion will return null. We need the if statement
+             res.status(404).send();
+        }
+            res.status(200).send(doc);
+        
+    }).catch((e) =>{
+        res.status(400).send(e);
+    })
+    
+});
 module.exports = {
     app
 };
