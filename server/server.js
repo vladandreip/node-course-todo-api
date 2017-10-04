@@ -1,3 +1,4 @@
+const _ = require('lodash'); // installed for the update route
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -77,6 +78,36 @@ app.delete('/todos/:id', (req, res) => {
         res.status(400).send(e);
     })
     
+});
+
+app.patch('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    //text si completed sunt trimise din postman 
+    var body = _.pick(req.body, ['text', 'completed'])//Reason why we loaded in loadash. The updates will be stored in the updates body. With pick we pull of the proprietis we allow the users to update
+    //the array consists of proprieties you want to pull off if they exist. For example: if the text propriety exists, we want to pull that of the req.body adding it to body(left)
+    if(!ObjectId.isValid(id)){
+        return res.status(404).send();
+    }
+
+    if( _.isBoolean(body.completed) && body.completed){
+        body.completedAt = new Date().getTime(); 
+    }else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+    Todo.findByIdAndUpdate(id, {
+        $set: body//seteaza la ce vrem sa facem update
+    }, {
+        new: true//simillar to  returnOriginal:false which means we want to get back the original updated record
+    }).then((todo) => {
+        if(!todo){
+            return res.status(404).send();
+        }
+
+        res.send({todo});
+    }).catch((e) => {
+        res.status(400).send();
+    })
 });
 
 module.exports = {
