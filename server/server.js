@@ -67,11 +67,11 @@ app.delete('/todos/:id', (req, res) => {
     if(!ObjectId.isValid(id)){
         return res.status(404).send();
     }
-    Todo.findByIdAndRemove(id).then((doc) => {
-        if(!doc){//if we do not have any record, the deletion will return null. We need the if statement
+    Todo.findByIdAndRemove(id).then((todo) => {
+        if(!todo){//if we do not have any record, the deletion will return null. We need the if statement
              return res.status(404).send();
         }
-            res.status(200).send(doc);
+            res.status(200).send({todo});
         
     }).catch((e) =>{
         res.status(400).send(e);
