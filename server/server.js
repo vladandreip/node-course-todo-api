@@ -1,3 +1,5 @@
+
+require('./config/config.js');
 const _ = require('lodash'); // installed for the update route
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -9,7 +11,7 @@ var {ObjectId} = require('mongodb');
 
 ////////Configuration for basic server///////////
 var app = express();//stores express application
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 app.listen(port, ()=>{
     console.log(`Started on port ${port}`);
 });
@@ -43,16 +45,16 @@ app.get('/todos/:id', (req, res) => {
     });
    
 });
-app.post('/users', (req,res) =>{
-    var user = new User({
-        email: req.body.email
-    });
-    user.save().then((doc) => {
-        console.log(doc);
-    }, (e) =>{
-        console.log('Could not save user.', e);
-    })
-});
+// app.post('/users', (req,res) =>{
+//     var user = new User({
+//         email: req.body.email
+//     });
+//     user.save().then((doc) => {
+//         console.log(doc);
+//     }, (e) =>{
+//         console.log('Could not save user.', e);
+//     })
+// });
 app.get('/todos', (req,res) =>{
     Todo.find().then((todos) => {
         res.send({//we create an object with first propriety being the todos array. By doing this we are able to send more codes, specifing them in the object
@@ -109,6 +111,22 @@ app.patch('/todos/:id', (req, res) => {
         res.status(400).send();
     })
 });
+
+app.post('/users', (req,res) => {
+    var body = _.pick(req.body, ['email', 'password']);
+    var user = new User(body);
+    user.save().then((user) => {//you can remove user fron then((user)) because it is the same as the one define up above
+        return user.generateAuthToken();//we are returning it because we know we are expecting a chaining promise 
+        //res.send(doc);
+    }).then((token) => {
+        res.header('x-auth', token).send(user.toJson());//we have to send the toke back as a http respons header
+        //first argument for the header is the header name and second is the the value you want to set the value
+        //x-auth means you are creating a custom header, which means it is not necessaraly a header that http suports by default, it is a header that we are using for our specific purposes
+        //we are using a jwt token scheme, so we are creating a custom header to store that value 
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+})
 
 module.exports = {
     app
