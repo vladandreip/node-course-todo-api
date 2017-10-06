@@ -21,7 +21,7 @@ var UserSchema = new mongoose.Schema({//we create a schema to get acces to the c
     },
     //going to be how we acces the tokens for individual users s
     tokens: [{
-        acces: {
+        access: {
             type: String,
             require: true
         },
@@ -45,11 +45,33 @@ UserSchema.methods.generateAuthToken = function() {//created method
         return token;
     });//.then((token) => {
 
-    
-    
-    
 };
+//we can acces statics directly through the model 
+UserSchema.statics.findByToken = function(token) {
+    var User = this;
+    var decoded;
+    try{
+        decoded = jwt.verify(token, 'abc123');
+    } catch(e){
+        return new Promise((resolve, reject) => {
+            reject();// SIMPLIFY: return Promise.reject();
+        })
+
+    }
+    // return User.findOne({'_id': decoded._id}).then();
+    // //this.find({'_id': decoded._id}).then();
+   
+    return User.findOne({//user.findOne willc return a promise and we are going to return that in order to add some channing.This means we can add a then call on findByToken over in server.js
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
+        
+    });
+
+
+}
 var User = mongoose.model('User', UserSchema);
 module.exports = {
     User: User
 }
+                                                              

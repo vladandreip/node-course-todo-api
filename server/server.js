@@ -8,6 +8,7 @@ var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
 var {ObjectId} = require('mongodb');
+var {authenticate} = require('./middleware/authenticate');
 
 ////////Configuration for basic server///////////
 var app = express();//stores express application
@@ -118,8 +119,8 @@ app.post('/users', (req,res) => {
     user.save().then((user) => {//you can remove user fron then((user)) because it is the same as the one define up above
         return user.generateAuthToken();//we are returning it because we know we are expecting a chaining promise 
         //res.send(doc);
-    }).then((token) => {
-        res.header('x-auth', token).send(user.toJson());//we have to send the toke back as a http respons header
+    }).then((token) => {//the header is what the user is going to need in order to authenticate 
+        res.header('x-auth', token).send(user.toJson());//we have to send the token back as a http respons header
         //first argument for the header is the header name and second is the the value you want to set the value
         //x-auth means you are creating a custom header, which means it is not necessaraly a header that http suports by default, it is a header that we are using for our specific purposes
         //we are using a jwt token scheme, so we are creating a custom header to store that value 
@@ -128,6 +129,15 @@ app.post('/users', (req,res) => {
     });
 })
 
+app.get('/users/me', authenticate, (req,res) => {//this route will require authentification: you must provide a valid x-auth token, it is going to find the associated user and send that user back 
+   console.log('HERE', req.user);
+    res.send(req.user.toJson());
+});
+
 module.exports = {
     app
 };
+//turning express routes in private routes require an x-auth token 
+//we are going to validate that token
+// we are going to find that user associated to that token 
+//then and only then you are able to run the route code
