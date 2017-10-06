@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 var UserSchema = new mongoose.Schema({//we create a schema to get acces to the custom methods of mongoose like findUserBy
     email: {
         required:true,
@@ -58,18 +59,32 @@ UserSchema.statics.findByToken = function(token) {
         })
 
     }
-    // return User.findOne({'_id': decoded._id}).then();
-    // //this.find({'_id': decoded._id}).then();
-   
     return User.findOne({//user.findOne willc return a promise and we are going to return that in order to add some channing.This means we can add a then call on findByToken over in server.js
         '_id': decoded._id,
         'tokens.token': token,
         'tokens.access': 'auth'
         
     });
-
-
 }
+UserSchema.pre('save', function(next){//run some code before a given event, and our given event is save
+    var user = this;
+    //if i update something that is not the password, like email, the previous hashed password will be hashed again
+    console.log('User password',user.password);
+    if(user.isModified('password')){
+        //When updating a user document, you have to check if the field you are updating is the password or you'll end up hashing a hashed password — this part is important when calling .save() anywhere.
+        bcrypt.genSalt(10, (err, salt) =>{
+        bcrypt.hash(user.password, salt, (err, hash) => {
+            user.password = hash;
+            next();
+        });  
+        
+        
+    });
+
+    }else {
+        next();
+    }
+});
 var User = mongoose.model('User', UserSchema);
 module.exports = {
     User: User

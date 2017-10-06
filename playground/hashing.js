@@ -3,6 +3,7 @@ const {SHA256} = require('crypto-js');//playground purposes
 const jwt = require('jsonwebtoken');
 var message = ' I am user number 3'
 var hash = SHA256(message).toString();
+const bcrypt = require('bcryptjs');// we will use this for cripting the users password. Added security. Got the salting functionality.
 console.log(`Message: ${message}`);
 console.log(`Hash: ${hash}`);
 //secret is only on the server
@@ -16,7 +17,7 @@ console.log(`Hash: ${hash}`);
 // token.data.id = 5;//user 4 wants to fuck up user 5
 // token.hash = SHA256(JSON.stringify(token.data)).toString();
 
-// var resultHash = SHA256(JSON.stringify(token.data) + 'somesecret').toString();
+// var resultHash = SHA256(JSON.stringify(token.data) + 'somesecret').toString();//salting the password with somesecret string
 // if(resultHash === token.hash){
 //     console.log('Data was not change');
 // }else {
@@ -32,3 +33,14 @@ var token = jwt.sign(data, '123abc')//takes the object, in this case the data wi
 
 var decoded = jwt.verify(token, '123abc')//takes the token and the secret and makes sure the data was not manipulated
 console.log('decoded', decoded);//iat is the timestamp in which the token was created
+
+
+/////using bcrypt
+var password = '123abc!';
+bcrypt.genSalt(10, (err, salt) =>{//10 represents the number of round for the algorithm.
+    bcrypt.hash(password, salt, (err, hash) =>{
+        console.log('Hash bcrypt', hash);
+    });
+   
+})
+//after we login a user we are going to fetch the crypted pass and we are going to compare it with the plain text value they gave us
