@@ -3,6 +3,7 @@ const request = require('supertest');
 
 const {app} = require('./../server')// the .. goes back from the tests directory into the server directory from where we can acces server.js without passing the extension
 const {Todo} = require('./../models/todo');
+const {User} = require('./../models/user');
 const {ObjectId} = require('mongodb');
 const {todos, populateTodos, users, populateUsers} = require('./seed/seed')
 
@@ -228,3 +229,40 @@ describe('Post /users', () => {
         .end(done);
     });
 })
+describe('Post /users/login', ()=>{
+    it('should login user and return auth token', (done)=>{
+        request(app)
+        .post('/users/login')
+        .send({
+            email:users[0].email,
+            password:users[0].password
+        })
+        .expect(200)
+        .expect((res) => {
+            expect(res.headers['x-auth']).toExist();
+        })
+        //.end(done);
+        .end((err, res) => {
+            if(err){
+                return done(err);
+            }
+            User.findOne({email: res.body.email}).then((user) => {
+                console.log(user);
+                expect(res.headers['x-auth']).toBe(user.tokens[1].token);
+                done();
+            }).catch((e) =>{
+                return done(e);
+            });
+        })
+    })
+    it('should reject invalid login', (done)=>{
+        request(app)
+        .post('/users/login')
+        .send({
+            email:users[0].email,
+            password:'badPass'
+        })
+        .expect(400)
+        .end(done);
+    })
+});
