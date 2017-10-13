@@ -146,7 +146,16 @@ app.post('/users/login', (req,res) => {//in cazul de mai sus se trimite inapoi u
     });;
     
 });
-
+//this route is private which means you have to be authenticated in order to ever run the code 
+//in out authenticate middleware we store the token used for authentification.
+app.delete('/users/me/token',authenticate, (req,res) => {
+    //deletes the token that was used in the authenticate middleware
+    req.user.removeToken(req.token).then(() => {//we have acces to the user via the authenticate method. The user.removeToken will return a promise and we chained it with a then call 
+        res.status(200).send();
+    }, () => {
+        res.status(400).send();
+    });
+})
 
 module.exports = {
     app
