@@ -3,6 +3,7 @@ require('./config/config.js');
 const _ = require('lodash'); // installed for the update route
 var express = require('express');
 var bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
@@ -132,6 +133,20 @@ app.post('/users', (req,res) => {
 app.get('/users/me', authenticate, (req,res) => {//this route will require authentification: you must provide a valid x-auth token, it is going to find the associated user and send that user back 
     res.send(req.user.toJson());
 });
+// POST /users/login {email, password}
+app.post('/users/login', (req,res) => {//in cazul de mai sus se trimite inapoi un auth token pe care il putem folosi sa accesam baza de date
+    //in cazul de aici in care user.ul face login cu emailul si parola corecte trebuie sa generam un alt token pe care sa il folosim pentru a accesa datele user.ului 
+    var body = _.pick(req.body,['email', 'password']);
+    User.findByCredentials(body.email, body.password).then((user) => {
+        user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send(user.toJson());
+        })
+    }).catch((e) => { //catch triggered
+        res.status(400).send();
+    });;
+    
+});
+
 
 module.exports = {
     app

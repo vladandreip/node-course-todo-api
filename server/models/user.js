@@ -66,6 +66,35 @@ UserSchema.statics.findByToken = function(token) {
         
     });
 }
+UserSchema.statics.findByCredentials = function(email, password){
+    var User = this;
+    //returnam ca sa putem lega .then(user) in server.js
+    return User.findOne({email}).then((user) =>{
+        if(!user){
+            return Promise.reject();// will trigger the catch case in server.js
+        }
+        //Case that bcrypt would not have supported promises
+        // return new Promise((resolve, reject) => {
+        //     bcrypt.compare(password, user.password,(err,res) => {
+        //         if(res){
+        //             resolve(user);
+        //         }
+        //         else{
+        //             reject();
+        //         }
+        //     });
+        // });
+    
+        return bcrypt.compare(password, user.password).then((res) => {
+                if(res){
+                    return Promise.resolve(user);
+                }
+                else{
+                    return Promise.reject();//will trigger the catch case in server.js
+                }
+            });
+    })
+}
 UserSchema.pre('save', function(next){//run some code before a given event, and our given event is save
     var user = this;
     //if i update something that is not the password, like email, the previous hashed password will be hashed again

@@ -7,7 +7,6 @@ var authenticate = (req, res, next) => {//written this way for reusability
         }
     
         req.user = user;//we can modify the request data and use it down bellow
-        console.log('POINT',user);
         req.token = token;
         next();
     }).catch((e) => {
